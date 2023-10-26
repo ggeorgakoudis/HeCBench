@@ -13,8 +13,8 @@ MINIFE_MATRIX_TYPE = -DMINIFE_CSR_MATRIX
 
 #-----------------------------------------------------------------------
 
-ARCH   = sm_60
-CFLAGS = -v -O3 
+ARCH   = sm_70
+CFLAGS = -v -O3 -g
 #	-S -emit-llvm
 #\
 #	-S -emit-llvm
@@ -22,14 +22,15 @@ CFLAGS = -v -O3
 #CFLAGS = -qreport -O3 -fopenmp -mcpu=power8 -mtune=power8
 
 CXXFLAGS = -I. -I../utils -I../fem $(MINIFE_TYPES) -O3 -x cu \
-	-arch=$(ARCH) \
+	--offload-arch=$(ARCH) \
 	$(MINIFE_MATRIX_TYPE) \
+	-g
 #            -DMINIFE_DEBUG \
 #	-DHAVE_MPI -DMPICH_IGNORE_CXX_SEEK \
 #	-DMINIFE_REPORT_RUSAGE
 
 LDFLAGS=-O3
-LIBS=
+LIBS=-L /usr/tce/packages/cuda/cuda-10.1.243/lib64 -lcudart
 
 # The MPICH_IGNORE_CXX_SEEK macro is required for some mpich versions,
 # such as the one on my cygwin machine.
@@ -43,9 +44,8 @@ LIBS=
 #CXX=icpc
 #CC=icc
 
-CXX=nvcc
-CC=nvcc
-LAUNCHER  =
+CXX=clang++
+CC=clang
 
 #CXX=xlC
 #CC=xlc

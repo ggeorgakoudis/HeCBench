@@ -479,15 +479,17 @@ namespace miniFE {
   //
 #if defined(MINIFE_CSR_MATRIX)
   template<typename MatrixType>
-    __global__ void matvec_kernel(const MINIFE_LOCAL_ORDINAL rows_size,
+    __global__ /*__launch_bounds__(128, 1)*/ void matvec_kernel(const MINIFE_LOCAL_ORDINAL rows_size,
         const typename MatrixType::LocalOrdinalType *Arowoffsets,
         const typename MatrixType::GlobalOrdinalType *Acols,
         const typename MatrixType::ScalarType *Acoefs,
         const typename MatrixType::ScalarType *xcoefs,
         typename MatrixType::ScalarType *ycoefs)
     {
-      MINIFE_LOCAL_ORDINAL row = blockIdx.x * blockDim.x + threadIdx.x;
-      if (row < rows_size) {
+      MINIFE_LOCAL_ORDINAL idx = blockIdx.x * blockDim.x + threadIdx.x;
+      MINIFE_LOCAL_ORDINAL total_threads = gridDim.x  * blockDim.x;
+
+      for( MINIFE_LOCAL_ORDINAL row = idx; row < rows_size; row+=total_threads) {
         MINIFE_GLOBAL_ORDINAL row_start = Arowoffsets[row];
         MINIFE_GLOBAL_ORDINAL row_end   = Arowoffsets[row+1];
         MINIFE_SCALAR sum = 0;
